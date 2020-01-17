@@ -118,7 +118,7 @@ function viewRoles() {
 function viewEmployees() {
 
     var query = "SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.name as Department, ";
-    query += "CONCAT(em.first_name, em.last_name) as Manager FROM employee e INNER JOIN role r ON r.id = e.role_id ";
+    query += "CONCAT(em.first_name, ' ', em.last_name) as Manager FROM employee e INNER JOIN role r ON r.id = e.role_id ";
     query += "inner join department d ON d.id = r.department_id LEFT JOIN employee em ON e.manager_id = em.id";
     connection.query(query, function (err, res) {
         console.log(err);
@@ -149,6 +149,7 @@ function addDept() {
 
 let choiceRole = [];
 let choiceMan = [];
+let choiceDept = [];
 
 function getempRoles() {
     connection.query("SELECT * FROM role", function (err, results) {
@@ -169,6 +170,17 @@ function getempMan() {
             let manName = fName.concat(' ', lName);
             choiceMan.push(manName);
         }
+    })
+}
+
+
+function getDeptid() {
+   connection.query("SELECT * FROM role", function (err, results){
+     if (err) throw err;
+        for (var i = 0; i < results.length; i++) {
+            choiceDept.push(results[i].name);
+        }
+        // return choiceDept;
     })
 }
 
@@ -248,9 +260,7 @@ function insertEmp(answers, roleId, newManid) {
 };
 
 function addRole() {
-    connection.query("SELECT * FROM department", function (err, results) {
-        if (err) throw err;
-
+    getDeptid();
         inquirer.prompt([
             {
                 name: "title",
@@ -258,6 +268,7 @@ function addRole() {
                 message: "Enter Title"
             },
             {
+
                 name: "salary",
                 type: "input",
                 message: "Enter salary"
@@ -265,26 +276,28 @@ function addRole() {
             {
                 name: "choice",
                 type: "list",
-                message: "Select a department",
-
-                choices: function () {
-                    var choiceDept = [];
-                    for (var i = 0; i < results.length; i++) {
-
-                        choiceDept.push(results[i].department_id);
-                    }
-
-                    return choiceDept;
-                }
-
+                choices: choiceDept,
+                message: "Select a department"
             }
 
-        ]).then(function (results) {
+        ]).then(function (answers) {
+        
+        connection.query("SELECT * FROM department WHERE ?",
+        { 
+            name: answers.choice,
+        },
+
+        function (err, res) {
+            if (err) throw err;
+             let newDeptid = res[0].id
+            console.log(newDeptid);
+
+       
             connection.query("INSERT INTO role SET ?",
                 {
                     title: results.title,
                     salary: results.salary,
-                    department_id: results.choiceDept
+                    department_id: newDeptid
                 },
                 function (err, res) {
                     if (err) throw err;
@@ -292,7 +305,6 @@ function addRole() {
                     connection.end();
                 });
         });
-    }
-    )
+    });
 }
 
