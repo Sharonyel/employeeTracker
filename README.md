@@ -1,18 +1,18 @@
 # Employee Tracker
 
+Description
+---
 
- The purpose of this app is to architect and build a solution for managing a company's employees using node, inquirer, and MySQL.
-
-
+Employee Tracker is a Content Management System that allows users to view and interact with information stored in a database. The purpose of this app is to architect and build a solution for managing a company's employees using node, inquirer, and MySQL.
 
 
  The database schema contains three tables:
 
 
-<img src="assets/images/screenshot1.png" width=600>
+<img src="assets/images/s1.jpg" width=600>
 
 
-Project source can be downloaded from (https://sharonyel.github.io/employeetracker/)
+Project source can be downloaded from (https://sharonyel.github.io/employeeTracker/)
 ---
 
  MIT License
