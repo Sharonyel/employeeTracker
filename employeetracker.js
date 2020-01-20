@@ -56,6 +56,9 @@ function runSearch() {
                 "Add a role",
                 "View employees",
                 "Add employee",
+                "Delete employee",
+                "Delete department",
+                "Delete role",
                 "Exit"
             ]
         })
@@ -89,6 +92,18 @@ function runSearch() {
                     updateEmpInfo();
                     break;
 
+                case "Delete employee":
+                    deleteEmp();
+                    break;
+
+                case "Delete department":
+                    deleteDept();
+                    break;
+
+                case "Delete role":
+                    deleteRole();
+                    break;
+
                 case "Exit":
                     connection.end();
                     break;
@@ -105,108 +120,109 @@ function updateEmpInfo() {
     const empIdupd = [];
 
     connection.query("SELECT id, CONCAT(first_name,' ', last_name) as name FROM employee", function (err, results) {
-    
-      if (err) throw err;
-      for (var i = 0; i < results.length; i++) {
-        empName.push(results[i].name)
-        empIdupd.push(results[i].id)
-      }     
-  
-      inquirer.prompt([
-        {
-          name: "empchoice",
-          type: "list",
-          message: "Choose the employee to update?",
-          choices: empName
-        },
-        {
-            name: "updatechoice",
-            type: "list",
-            message: "What would you like to update?",
-            choices: ["Role", "Manager"]
+
+        if (err) throw err;
+        for (var i = 0; i < results.length; i++) {
+            empName.push(results[i].name)
+            empIdupd.push(results[i].id)
         }
-    ]).then(function (answer) {
+
+        inquirer.prompt([
+            {
+                name: "empchoice",
+                type: "list",
+                message: "Choose the employee to update?",
+                choices: empName
+            },
+            {
+                name: "updatechoice",
+                type: "list",
+                message: "What would you like to update?",
+                choices: ["Role", "Manager"]
+            }
+        ]).then(function (answer) {
             if (err) throw err;
             let empupdName = answer.empchoice.split(" ")
 
             if (answer.updatechoice === "Manager") {
                 updateManager(empupdName);
-            } else 
-            if (answer.updatechoice === "Role"){
-            updateRole(empupdName);
-            }
+            } else
+                if (answer.updatechoice === "Role") {
+                    updateRole(empupdName);
+                }
         })
- 
-}) 
-}   
+
+    })
+}
 
 function updateManager(empupdName) {
     const managers = [];
     const empIdno = [];
 
     connection.query("SELECT id, CONCAT(first_name,' ', last_name) as name FROM employee", function (err, results) {
-    
+
         if (err) throw err;
         for (var i = 0; i < results.length; i++) {
-          managers.push(results[i].name)
-          empIdno.push(results[1].id)
+            managers.push(results[i].name)
+            empIdno.push(results[1].id)
 
-        }     
-          inquirer.prompt(
-
-        {
-          name: "manchoice",
-          type: "list",
-          message: "Select a new manager",
-          choices: managers
         }
-  
-      ).then(function (answer) {
-          let manName = answer.manchoice.split(' ');
-      connection.query('SELECT id FROM employee WHERE ? AND ?', 
-      [{
-             first_name: manName[0]
-        }, 
-        {  last_name: manName[1]
-      }],
+        inquirer.prompt(
 
-      function (err, results) {
-        if (err) throw err;
-        let manId = results[0].id;
-        console.log("man id " + manId)
+            {
+                name: "manchoice",
+                type: "list",
+                message: "Select a new manager",
+                choices: managers
+            }
 
-        connection.query('SELECT id FROM employee WHERE ? AND ?', 
-        [{
-               first_name: empupdName[0]
-          }, 
-          {  last_name: empupdName[1]
-        }],
-  
-        function (err, results) {
-          if (err) throw err;
-        //   let emmanId = results[0].id
+        ).then(function (answer) {
+            let manName = answer.manchoice.split(' ');
+            connection.query('SELECT id FROM employee WHERE ? AND ?',
+                [{
+                    first_name: manName[0]
+                },
+                {
+                    last_name: manName[1]
+                }],
+
+                function (err, results) {
+                    if (err) throw err;
+                    let manId = results[0].id;
+                    console.log("man id " + manId)
+
+                    connection.query('SELECT id FROM employee WHERE ? AND ?',
+                        [{
+                            first_name: empupdName[0]
+                        },
+                        {
+                            last_name: empupdName[1]
+                        }],
+
+                        function (err, results) {
+                            if (err) throw err;
+                            //   let emmanId = results[0].id
+                        })
+
+                    connection.query("UPDATE employee SET ? WHERE ?",
+                        [{
+                            manager_id: manId
+                        },
+                        {
+                            id: results[0].id
+                        }],
+                        function (err, results) {
+                            if (err) throw err;
+
+                            console.log(chalk.green("The employee " + empupdName[0] + " " + empupdName[1] + "'s manager has been updated"));
+                            runSearch();
+
+                        })
+                })
+
         })
-  
-        connection.query("UPDATE employee SET ? WHERE ?", 
-        [{
-            manager_id: manId
-        }, 
-        {
-            id: results[0].id
-        }],
-        function (err, results) {
-          if (err) throw err;
-
-           console.log(chalk.green("The employee " + empupdName[0] + " " + empupdName[1] + "'s manager has been updated"));     
-           connection.end();
-           runSearch();
-         
-        })
-      })
-
     })
-    })
-  }
+}
 
 
 
@@ -214,71 +230,69 @@ function updateManager(empupdName) {
 function updateRole(empupdName) {
     const roles = [];
 
-        connection.query("SELECT id, title FROM role", function (err, results) {
-            if (err) throw err;
-            for (var i = 0; i < results.length; i++) {
-              roles.push(results[i].title)
-    
-            }
+    connection.query("SELECT id, title FROM role", function (err, results) {
+        if (err) throw err;
+        for (var i = 0; i < results.length; i++) {
+            roles.push(results[i].title)
+
+        }
         inquirer.prompt(
 
-        {
-          name: "rolechoice",
-          type: "list",
-          message: "Select new role",
-          choices: roles
-        }
-  
-      ).then(function (answer) {
-      connection.query('SELECT id FROM employee WHERE ? AND ?', 
-      [{
-             first_name: empupdName[0]
-        }, 
-        {  last_name: empupdName[1]
-      }],
+            {
+                name: "rolechoice",
+                type: "list",
+                message: "Select new role",
+                choices: roles
+            }
 
-      function (err, results) {
-        if (err) throw err;
-        empId = results[0].id;
-        console.log("name id " + empId)
-        connection.query("SELECT id FROM role WHERE ?", 
-        {
-            title: answer.rolechoice
-        }, 
-        function (err, results) {
-          if (err) throw err;
-          let roleId = results[0].id;
-          console.log("role id " + roleId)
-          
-          console.log("rolechoice " + answer.rolechoice)
-          connection.query("UPDATE employee SET ? WHERE ?", 
-          [{
-              role_id: roleId
-          }, 
-          {
-              id: empId
-            }], 
-            function (err, res) {
-            if (err) throw err;
+        ).then(function (answer) {
+            connection.query('SELECT id FROM employee WHERE ? AND ?',
+                [{
+                    first_name: empupdName[0]
+                },
+                {
+                    last_name: empupdName[1]
+                }],
 
-           console.log(chalk.green("The employee " + empupdName[0] + " " + empupdName[1] + "'s role has been updated"));     
-           connection.end();
-           runSearch();
-          })
+                function (err, results) {
+                    if (err) throw err;
+                    empId = results[0].id;
+                    console.log("name id " + empId)
+                    connection.query("SELECT id FROM role WHERE ?",
+                        {
+                            title: answer.rolechoice
+                        },
+                        function (err, results) {
+                            if (err) throw err;
+                            let roleId = results[0].id;
+                            console.log("role id " + roleId)
+
+                            console.log("rolechoice " + answer.rolechoice)
+                            connection.query("UPDATE employee SET ? WHERE ?",
+                                [{
+                                    role_id: roleId
+                                },
+                                {
+                                    id: empId
+                                }],
+                                function (err, res) {
+                                    if (err) throw err;
+
+                                    console.log(chalk.green("The employee " + empupdName[0] + " " + empupdName[1] + "'s role has been updated"));
+                                    runSearch();
+                                })
+                        })
+                })
+
         })
-      })
-
     })
-    })
-  }
+}
 
 function viewDept() {
     var query = "SELECT * FROM department";
     connection.query(query, function (err, res) {
-
         console.table(res);
-     
-        connection.end();
+        runSearch();
 
 
     });
@@ -289,7 +303,7 @@ function viewRoles() {
     connection.query(query, function (err, res) {
 
         console.table(res);
-        connection.end();
+        runSearch();
 
 
     });
@@ -300,9 +314,8 @@ function viewEmployees() {
     query += "CONCAT(em.first_name, ' ', em.last_name) as Manager FROM employee e INNER JOIN role r ON r.id = e.role_id ";
     query += "inner join department d ON d.id = r.department_id LEFT JOIN employee em ON e.manager_id = em.id";
     connection.query(query, function (err, res) {
-        // console.log(err);
         console.table(res);
-        connection.end();
+        runSearch();
     });
 }
 
@@ -318,8 +331,8 @@ function addDept() {
             },
             function (err, res) {
                 if (err) throw err;
-                console.log("The deparment was entered successfully!");
-                connection.end();
+                console.log(chalk.green("The department " + answer.department + " was entered successfully!"));
+                runSearch();
             });
     });
 }
@@ -417,27 +430,25 @@ function addEmp() {
                         newManid = res[0].id
                         console.log(newManid)
                         connection.query("INSERT INTO employee SET ?",
-                        {
-                            first_name: answers.firstname,
-                            last_name: answers.lastname,
-                            role_id: roleId,
-                            manager_id: newManid
-                        },
-                        function (err, res) {
-                            if (err) throw err;
-                            // console.log(first_name)
-                            console.log(chalk.green("The employee " + answers.firstname + " " + answers.lastname + " " + "was entered successfully!"));
-                            connection.end();
-                
-                        });
+                            {
+                                first_name: answers.firstname,
+                                last_name: answers.lastname,
+                                role_id: roleId,
+                                manager_id: newManid
+                            },
+                            function (err, res) {
+                                if (err) throw err;
+                                // console.log(first_name)
+                                console.log(chalk.green("The employee " + answers.firstname + " " + answers.lastname + " " + "was entered successfully!"));
+                                runSearch();
+
+                            });
                     })
             })
 
     }
     )
 }
-
-
 
 function addRole() {
     getDeptid();
@@ -483,9 +494,158 @@ function addRole() {
                     function (err, res) {
                         if (err) throw err;
                         console.log(chalk.green("The role " + answers.title + "was entered successfully!"));
-                        connection.end();
+                        runSearch();
                     });
             });
     });
 }
 
+function deleteEmp() {
+    let names = [];
+    connection.query("SELECT id, CONCAT(first_name,' ', last_name) as name FROM employee", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            names.push(res[i].name)
+        }
+
+        inquirer.prompt([{
+            name: "delete",
+            type: "list",
+            message: "Choose the employee to delete?",
+            choices: names
+        },
+        {
+            name: "confirm",
+            type: "list",
+            message: "Are you sure you want to delete this person?",
+            choices: ["Yes", "No"]
+        }
+
+        ]).then(function (answer) {
+            if (answer.confirm === "Yes") {
+                let names = answer.delete.split(" ")
+
+                connection.query("SELECT id FROM employee WHERE ? AND ?",
+                    [{ first_name: names[0] },
+                    { last_name: names[1] }],
+                    function (err, results) {
+                        if (err) throw err;
+                        connection.query("DELETE FROM employee WHERE id = ?", results[0].id, function (err, res) {
+                            if (err) throw err;
+
+                            console.log(chalk.green("Deleted " + answer.delete + " from the database"));
+
+                            runSearch();
+
+                        })
+                    })
+            }
+            else {
+                runSearch();
+
+            }
+
+        })
+    })
+}
+
+function deleteDept() {
+    let depts = [];
+    connection.query("SELECT name FROM department", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            depts.push(res[i].name)
+        }
+
+        inquirer.prompt([{
+            name: "delete",
+            type: "list",
+            message: "Choose the department to delete?",
+            choices: depts
+        },
+        {
+            name: "confirm",
+            type: "list",
+            message: "Are you sure you want to delete this person?",
+            choices: ["Yes", "No"]
+        }
+
+        ]).then(function (answer) {
+            if (answer.confirm === "Yes") {
+                console.log("depts " + answer.delete)
+                connection.query("SELECT id FROM department WHERE ?",
+                    { name: answer.delete },
+                    function (err, results) {
+                        if (err) throw err;
+                        console.log("dept id " + results[0].id)
+                        connection.query("DELETE FROM department WHERE ?",
+                            { id: results[0].id },
+
+                            function (err, res) {
+                                if (err) throw err;
+
+                                console.log(chalk.green("Deleted " + answer.delete + " from the database"));
+
+                                runSearch();
+
+                            })
+                    })
+            }
+            else {
+                runSearch();
+
+            }
+
+        })
+    })
+}
+function deleteRole() {
+    let roles = [];
+    connection.query("SELECT title FROM role", function (err, res) {
+        if (err) throw err;
+        for (var i = 0; i < res.length; i++) {
+            roles.push(res[i].title)
+        }
+
+        inquirer.prompt([{
+            name: "delete",
+            type: "list",
+            message: "Choose the role to delete?",
+            choices: roles
+        },
+        {
+            name: "confirm",
+            type: "list",
+            message: "Are you sure you want to delete this person?",
+            choices: ["Yes", "No"]
+        }
+
+        ]).then(function (answer) {
+            if (answer.confirm === "Yes") {
+                console.log("roles " + answer.delete)
+                connection.query("SELECT id FROM role WHERE ?",
+                    { title: answer.delete },
+                    function (err, results) {
+                        if (err) throw err;
+                        console.log("dept id " + results[0].id)
+                        connection.query("DELETE FROM role WHERE ?",
+                            { id: results[0].id },
+
+                            function (err, res) {
+                                if (err) throw err;
+
+                                console.log(chalk.green("Deleted " + answer.delete + " from the database"));
+
+                                runSearch();
+
+                            })
+                    })
+            }
+            else {
+                runSearch();
+
+            }
+
+        })
+    })
+}
