@@ -9,8 +9,7 @@ Employee Tracker is a Content Management System that allows users to view and in
  The database schema contains three tables:
 
 
-<img src="./assets/images/s1.jpg" width=500>
-
+<img src="/assets/images/ss1.jpg" width=500>
 
 Project source can be downloaded from (https://sharonyel.github.io/employeeTracker/)
 ---
