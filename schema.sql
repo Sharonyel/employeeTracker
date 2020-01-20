@@ -8,7 +8,7 @@ CREATE TABLE department (
   name VARCHAR(30) NOT NULL,
   PRIMARY KEY (id)
 );
--- ALTER TABLE department AUTO_INCREMENT=10;
+ALTER TABLE department AUTO_INCREMENT=10;
 
 CREATE TABLE role (
   id INT NOT NULL auto_increment,
@@ -18,7 +18,7 @@ CREATE TABLE role (
   PRIMARY KEY (id)
 );
 
--- ALTER TABLE role AUTO_INCREMENT=200;
+ALTER TABLE role AUTO_INCREMENT=200;
 
 create TABLE employee (
   id INT NOT NULL AUTO_INCREMENT,
@@ -28,7 +28,7 @@ create TABLE employee (
   manager_id int,
   PRIMARY KEY (id)
 );
--- ALTER TABLE employee AUTO_INCREMENT=3000;
+ALTER TABLE employee AUTO_INCREMENT=3000;
 
 SELECT * FROM department;
 SELECT * FROM role;

@@ -6,8 +6,6 @@ var choiceRole = [];
 var choiceMan = [];
 var choiceDept = [];
 
-
-
 var connection = mysql.createConnection({
     host: "localhost",
 
@@ -107,8 +105,6 @@ function runSearch() {
                 case "Exit":
                     connection.end();
                     break;
-
-
 
             }
         });
